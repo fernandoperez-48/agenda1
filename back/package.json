@@ -9,7 +9,6 @@
   },
   "author": "MIT",
   "license": "ISC",
-  "type": "commonjs",
   "description": "",
   "dependencies": {
     "bcryptjs": "^3.0.3",
