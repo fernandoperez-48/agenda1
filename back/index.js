@@ -1,5 +1,6 @@
 import { contactos } from "./datos/contactos.js";
 import express from "express";
+import { validarContacto, validarParcial } from "./helpers/zod.js";
 
 const app = express();
 
@@ -34,17 +35,39 @@ app.delete("/:id", (req, res) => {
 });
 
 app.post("/", (req, res) => {
-    const contacto=req.body;
+    const contacto=validarContacto(req.body);
+
+    if(contacto.error){
+        return res.status(400).json('validacion incorrecta');
+    }
+
     const nuevoContacto={
-        id:contacto.id,
-        nombre:contacto.nombre,
-        apellido:contacto.apellido,
-        email:contacto.email,
-        empresa:contacto.empresa,
-        domicilio:contacto.domicilio,
-        telefono:contacto.telefono
-    };
+        ...contacto.data
+    }
+
     listaContactos=[...listaContactos,nuevoContacto];
+    res.json(nuevoContacto);
+});
+
+app.put("/:id", (req, res) => {
+    const id=Number(req.params.id);
+    const contactoValido=validarParcial(req.body);
+
+    if(contactoValido.error){
+        return res.status(400).json('validacion incorrecta');
+    }
+
+    const contactoIndex=listaContactos.findIndex(c=>c.id===id);
+
+    if(contactoIndex===-1){
+        return res.status(404).json('Contacto no encontrado');
+    }
+
+    const nuevoContacto={
+        ...listaContactos[contactoIndex],
+        ...contactoValido.data
+    }
+    listaContactos[contactoIndex]=nuevoContacto;
     res.json(nuevoContacto);
 });
 
