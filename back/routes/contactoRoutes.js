@@ -1,16 +1,21 @@
 import {Router} from 'express';
 import {ContactoController} from '../controllers/contactoController.js';
 
-export const contactoRoutes=Router();
+export const Enrutador=(modelo) => {
 
-contactoRoutes.get("/", ContactoController.getAll);
+const controlador = new ContactoController(modelo);
 
-contactoRoutes.get("/:id", ContactoController.getById);
+const contactoRoutes=Router();
 
-contactoRoutes.delete("/:id", ContactoController.delete);
+contactoRoutes.get("/", controlador.getAll);
 
-contactoRoutes.post("/", ContactoController.create);
+contactoRoutes.get("/:id", controlador.getById);
 
-contactoRoutes.put("/:id", ContactoController.update);
+contactoRoutes.delete("/:id", controlador.delete);
 
-   
+contactoRoutes.post("/", controlador.create);
+
+contactoRoutes.put("/:id", controlador.update);
+
+return contactoRoutes;
+}
