@@ -2,9 +2,10 @@ import jwt from "jwt-simple"
 import 'dotenv/config'
 
 
-const caducidad =1000*30
+const caducidad =1000 * 604800
 
 export const crearToken=(usuario)=>{
+    
     const payload={
         id:usuario.id,
         nick:usuario.nick,

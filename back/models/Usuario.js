@@ -1,6 +1,6 @@
 import {usuarios} from "../datos/usuarios.js"
 import bcrypt from "bcrypt"
-
+import {crearToken} from "../helpers/jwt_users.js"
 
 let usuariosDevolver=usuarios
 
@@ -49,10 +49,12 @@ export class Usuario{
             return "Fallo autenticacion"
         }
 
+        const token=crearToken(usuarioRegistrado)
+
         const usuarioFormateado={
             nick:usuarioRegistrado.nick,
             mail:usuarioRegistrado.mail,
-            token:"token"
+            token:token
         }
         return usuarioFormateado
 
