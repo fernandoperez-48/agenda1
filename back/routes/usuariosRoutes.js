@@ -9,6 +9,7 @@ export const CreadorUsuarios = (modelo)=>{
 
 
     usuarioRouter.post('/',controlador.register)
+    usuarioRouter.post('/login',controlador.login)
 
     return usuarioRouter
 
