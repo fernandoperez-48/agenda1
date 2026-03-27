@@ -13,7 +13,7 @@ export class ContactoController {
 
     getById = async (req, res) => {
         const id = req.params.id;
-        const contacto = await this.modelo.getById(id);
+        const contacto = await this.modelo.getOneById(id);
         if (contacto) {
             res.json(contacto);
         } else {

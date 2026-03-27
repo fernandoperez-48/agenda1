@@ -1,6 +1,6 @@
 import mongoose, { model, Schema } from "mongoose";
 import { conexion } from "../helpers/conexion.js";
-import { email } from "zod";
+
 
 conexion();
 
