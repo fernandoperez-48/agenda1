@@ -1,17 +1,16 @@
-import React, { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { AuthContext } from './ProveedorContexto.jsx'
-import { Login } from './Login.jsx';
-
 
 export const ResultadoContacto = () => {
 
-    const [usuarioAuth, setUsuarioAuth] = useContext(AuthContext);
-    const [contactosState, setContactosState] = useState({});
-    const [exito, setExito] = useState(false);
+    const [usuarioAuth] = useContext(AuthContext)
+    const [contactosState, setContactosState] = useState([])
+    const [cargando, setCargando] = useState(true)
+    const [error, setError] = useState(null)
 
     useEffect(() => {
         resultados()
-    }, []);
+    }, [])
 
     const resultados = async () => {
         try {
@@ -21,30 +20,36 @@ export const ResultadoContacto = () => {
                     'Content-Type': 'application/json',
                     'Authorization': usuarioAuth.token
                 }
-            });
-            const datos = await peticion.json();
-            
-            if(peticion.status ==404){
-                setExito(false);
-            } else {
-                setExito(true);
-                setContactosState(datos);
+            })
+
+            if (!peticion.ok) {
+                setError('No se pudieron obtener los contactos')
+                setCargando(false)
+                return
             }
+
+            const datos = await peticion.json()
+            setContactosState(datos)
+            setCargando(false)
+
         } catch (e) {
-            console.log(e);
+            console.log(e)
+            setError('Error de conexión con el servidor')
+            setCargando(false)
         }
-    };
+    }
 
+    if (cargando) return <p>Cargando contactos...</p>
+    if (error) return <p style={{ color: 'red' }}>{error}</p>
 
-  return (
-    <>
-        <ul>
-            {exito ? contactosState.map((contacto)=>{
-                return (<li key={contacto._id}>{contacto.nombre}</li>)
-            }):<Login />}
-
-        </ul>
-    
-    </>
-  )
+    return (
+        <>
+            <h2>Contactos de {usuarioAuth.nick}</h2>
+            <ul>
+                {contactosState.map((contacto) => (
+                    <li key={contacto._id}>{contacto.nombre} {contacto.apellido}</li>
+                ))}
+            </ul>
+        </>
+    )
 }

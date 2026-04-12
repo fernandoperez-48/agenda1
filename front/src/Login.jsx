@@ -1,24 +1,22 @@
-import React from 'react'
-import { useState } from 'react'
-
+import React, { useState, useContext } from 'react'
+import { useNavigate, NavLink } from 'react-router-dom'
+import { AuthContext } from './ProveedorContexto.jsx'
 
 export const Login = () => {
 
-    const[formulario, setFormulario] = useState({})
-    const[exito, setExito] = useState(false)
+    const [usuarioAuth, setUsuarioAuth] = useContext(AuthContext)
+    const [error, setError] = useState(null)
+    const navigate = useNavigate()
 
     const recogerForm = (e) => {
         e.preventDefault()
-       
-        let usuario=
-        {
+
+        const usuario = {
             nick: e.target.usuario.value,
             password: e.target.password.value
         }
 
-        setFormulario(usuario)
         buscar(usuario)
-        // Aquí iría la lógica para enviar los datos al backend
     }
 
     const buscar = async (usuario) => {
@@ -29,32 +27,36 @@ export const Login = () => {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify(usuario)
-            });
+            })
 
-            const data = await peticion.json();
-            if (data.status==400) {
-                setExito(false);
-            } else {
-                setExito(true);
-                localStorage.setItem('usuario', JSON.stringify(data.usuario));
+            if (!peticion.ok) {
+                setError('Usuario o contraseña incorrectos')
+                return
             }
+
+            const data = await peticion.json()
+            localStorage.setItem('usuario', JSON.stringify(data))
+            setUsuarioAuth(data)
+            navigate('/contactos')
+
         } catch (e) {
-            console.log(e);
-            setFormulario({}); // Reiniciar el formulario en caso de error
+            console.log(e)
+            setError('Error de conexión con el servidor')
         }
-    };
+    }
 
-
-  return (
-    <>
-        <form onSubmit={recogerForm}>
-            <label htmlFor="usuario">Usuario:</label>
-            <input type="text" id="usuario" name="usuario" placeholder='Usuario' />
-            <label htmlFor="password">Password:</label>
-            <input type="text" name='password' id="contraseña" placeholder='Password'/>
-            <input type="submit"/>
-        </form>
-       
-    </>
-  )
+    return (
+        <>
+            <h2>Iniciar sesión</h2>
+            <form onSubmit={recogerForm}>
+                <label htmlFor="usuario">Usuario:</label>
+                <input type="text" id="usuario" name="usuario" placeholder='Usuario' />
+                <label htmlFor="password">Password:</label>
+                <input type="text" name='password' id="contraseña" placeholder='Password' />
+                <input type="submit" value="Ingresar" />
+            </form>
+            {error && <p style={{ color: 'red' }}>{error}</p>}
+            <NavLink to="/registro">¿No tenés cuenta? Registrate</NavLink>
+        </>
+    )
 }
