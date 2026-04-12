@@ -9,6 +9,13 @@ const ContactoSchema = new Schema(
     nombre: String,
     apellido: String,
     email: String,
+    empresa: String,
+    domicilio: String,
+    telefonos: [String],
+    propietario: { type: Schema.Types.ObjectId, ref: "Usuario" },
+    esPublico: { type: Boolean, default: false },
+    esVisible: { type: Boolean, default: true },
+    password: String,
   },
   {
     versionKey: false,

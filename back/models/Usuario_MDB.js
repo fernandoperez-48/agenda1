@@ -9,7 +9,8 @@ const usuarioSchema = new Schema(
     {
         nick:String,
         password:String,
-        mail:String
+        mail:String,
+        rol: { type: String, enum: ["admin", "usuario"], default: "usuario" }
     },
     {
         versionKey:false

@@ -1,14 +1,16 @@
 import zod from 'zod'
 
 const contactosSchema= zod.object({
-    id:zod.number(),
     nombre:zod.string(),
     apellido:zod.string(),
-    empresa:zod.string().optional(),
     email:zod.string(),
+    empresa:zod.string().optional(),
     domicilio:zod.string().optional(),
-    telefono:zod.string().optional()
-
+    telefonos:zod.array(zod.string()).optional(),
+    propietario:zod.string().optional(),
+    esPublico:zod.boolean().optional(),
+    esVisible:zod.boolean().optional(),
+    password:zod.string().optional(),
 })
 
 export const validarContacto = (contacto) => {
