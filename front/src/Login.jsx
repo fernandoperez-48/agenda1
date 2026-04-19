@@ -1,10 +1,10 @@
-import React, { useState, useContext } from 'react'
+import { useState, useContext } from 'react'
 import { useNavigate, NavLink } from 'react-router-dom'
 import { AuthContext } from './ProveedorContexto.jsx'
 
 export const Login = () => {
 
-    const [usuarioAuth, setUsuarioAuth] = useContext(AuthContext)
+    const [, setUsuarioAuth] = useContext(AuthContext)
     const [error, setError] = useState(null)
     const navigate = useNavigate()
 
@@ -46,7 +46,7 @@ export const Login = () => {
     }
 
     return (
-        <div className="min-vh-100 d-flex align-items-center justify-content-center">
+        <div className="py-5 d-flex justify-content-center">
             <div className="card shadow" style={{ width: '400px' }}>
                 <div className="card-body p-4">
                     <h2 className="card-title text-center mb-4">Iniciar sesión</h2>

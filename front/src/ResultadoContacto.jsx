@@ -1,14 +1,12 @@
 import { useContext, useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { AuthContext } from './ProveedorContexto.jsx'
 
 export const ResultadoContacto = () => {
 
-    const [usuarioAuth, setUsuarioAuth] = useContext(AuthContext)
+    const [usuarioAuth] = useContext(AuthContext)
     const [contactosState, setContactosState] = useState([])
     const [cargando, setCargando] = useState(true)
     const [error, setError] = useState(null)
-    const navigate = useNavigate()
 
     useEffect(() => {
         resultados()
@@ -41,26 +39,8 @@ export const ResultadoContacto = () => {
         }
     }
 
-    const cerrarSesion = () => {
-        localStorage.removeItem('usuario')
-        setUsuarioAuth(null)
-        navigate('/login')
-    }
-
     return (
         <>
-            <nav className="navbar navbar-dark bg-primary">
-                <div className="container">
-                    <span className="navbar-brand fw-bold">Agenda</span>
-                    <div className="d-flex align-items-center gap-3">
-                        <span className="text-white">Hola, {usuarioAuth.nick}</span>
-                        <button className="btn btn-outline-light btn-sm" onClick={cerrarSesion}>
-                            Cerrar sesión
-                        </button>
-                    </div>
-                </div>
-            </nav>
-
             <div className="container mt-4">
                 {cargando && (
                     <div className="d-flex justify-content-center mt-5">

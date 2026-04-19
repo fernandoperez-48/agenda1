@@ -42,7 +42,7 @@ export const Registro = () => {
     }
 
     return (
-        <div className="min-vh-100 d-flex align-items-center justify-content-center">
+        <div className="py-5 d-flex justify-content-center">
             <div className="card shadow" style={{ width: '400px' }}>
                 <div className="card-body p-4">
                     <h2 className="card-title text-center mb-4">Registro</h2>
