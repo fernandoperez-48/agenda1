@@ -25,9 +25,14 @@ const ContactoSchema = new Schema(
 const Contacto=model("Contacto", ContactoSchema);
 
 export class ContactoModel {
-    static async getAll(){
+    static async getAll(userId){
         try {
-            return Contacto.find();
+            return await Contacto.find({
+                $or: [
+                    { propietario: userId },
+                    { esPublico: true, esVisible: true }
+                ]
+            });
         } catch (e) {
             console.log(e);
         }
@@ -49,18 +54,32 @@ export class ContactoModel {
         }
     }
 
-    static async create(contacto){
+    static async create(contacto, propietarioId){
         if(!contacto.success){
             return Error
         }
 
-        const nuevoContacto= {...contacto.data};
+        const nuevoContacto= { ...contacto.data, propietario: propietarioId };
 
         const contactoGuardar= new Contacto(nuevoContacto);
 
         try {
             await contactoGuardar.save();
-                return nuevoContacto;
+                return contactoGuardar;
+        } catch (e){
+            console.log(e);
+        }
+    }
+
+    static async togglePublico(id){
+        try {
+            const contacto = await Contacto.findById(id);
+            if (!contacto) return null;
+            return await Contacto.findByIdAndUpdate(
+                id,
+                { esPublico: !contacto.esPublico },
+                { new: true }
+            );
         } catch (e){
             console.log(e);
         }

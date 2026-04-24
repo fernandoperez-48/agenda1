@@ -16,8 +16,9 @@ export const ResultadoContacto = () => {
     const [contactosState, setContactosState] = useState([])
     const [cargando, setCargando] = useState(true)
     const [error, setError] = useState(null)
-    const [mostrarFormulario, setMostrarFormulario] = useState(false)
     const [formulario, setFormulario] = useState(formularioVacio)
+    const [modoFormulario, setModoFormulario] = useState(null) // null | 'agregar' | 'editar'
+    const [editandoId, setEditandoId] = useState(null)
     const [errorFormulario, setErrorFormulario] = useState(null)
     const [guardando, setGuardando] = useState(false)
 
@@ -56,41 +57,50 @@ export const ResultadoContacto = () => {
         setFormulario({ ...formulario, [e.target.name]: e.target.value })
     }
 
-    const handleAgregar = async (e) => {
-        e.preventDefault()
-        setErrorFormulario(null)
-        setGuardando(true)
-
-        const nuevoContacto = {
+    const buildBody = () => {
+        const body = {
             nombre: formulario.nombre,
             apellido: formulario.apellido,
             email: formulario.email,
         }
-        if (formulario.empresa) nuevoContacto.empresa = formulario.empresa
-        if (formulario.domicilio) nuevoContacto.domicilio = formulario.domicilio
+        if (formulario.empresa) body.empresa = formulario.empresa
+        if (formulario.domicilio) body.domicilio = formulario.domicilio
         if (formulario.telefonos) {
-            nuevoContacto.telefonos = formulario.telefonos.split(',').map(t => t.trim()).filter(t => t)
+            body.telefonos = formulario.telefonos.split(',').map(t => t.trim()).filter(t => t)
         }
+        return body
+    }
+
+    const handleSubmitFormulario = async (e) => {
+        e.preventDefault()
+        setErrorFormulario(null)
+        setGuardando(true)
+
+        const url = modoFormulario === 'editar'
+            ? `http://localhost:1234/contactos/${editandoId}`
+            : 'http://localhost:1234/contactos'
+        const method = modoFormulario === 'editar' ? 'PUT' : 'POST'
 
         try {
-            const peticion = await fetch('http://localhost:1234/contactos', {
-                method: 'POST',
+            const peticion = await fetch(url, {
+                method,
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': usuarioAuth.token
                 },
-                body: JSON.stringify(nuevoContacto)
+                body: JSON.stringify(buildBody())
             })
 
             if (!peticion.ok) {
-                setErrorFormulario('No se pudo crear el contacto. Verificá los datos.')
+                setErrorFormulario('No se pudo guardar el contacto. Verificá los datos.')
                 setGuardando(false)
                 return
             }
 
             await resultados()
             setFormulario(formularioVacio)
-            setMostrarFormulario(false)
+            setModoFormulario(null)
+            setEditandoId(null)
 
         } catch (e) {
             console.log(e)
@@ -103,8 +113,61 @@ export const ResultadoContacto = () => {
     const handleCancelar = () => {
         setFormulario(formularioVacio)
         setErrorFormulario(null)
-        setMostrarFormulario(false)
+        setModoFormulario(null)
+        setEditandoId(null)
     }
+
+    const handleAbrirEditar = (contacto) => {
+        setFormulario({
+            nombre: contacto.nombre || '',
+            apellido: contacto.apellido || '',
+            email: contacto.email || '',
+            empresa: contacto.empresa || '',
+            domicilio: contacto.domicilio || '',
+            telefonos: contacto.telefonos?.join(', ') || ''
+        })
+        setEditandoId(contacto._id)
+        setModoFormulario('editar')
+        setErrorFormulario(null)
+    }
+
+    const handleEliminar = async (id) => {
+        if (!window.confirm('¿Eliminar este contacto?')) return
+        try {
+            const peticion = await fetch(`http://localhost:1234/contactos/${id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': usuarioAuth.token }
+            })
+            if (!peticion.ok) {
+                setError('No se pudo eliminar el contacto')
+                return
+            }
+            await resultados()
+        } catch (e) {
+            console.log(e)
+            setError('Error de conexión con el servidor')
+        }
+    }
+
+    const handleTogglePublico = async (id) => {
+        try {
+            const peticion = await fetch(`http://localhost:1234/contactos/${id}/publico`, {
+                method: 'PATCH',
+                headers: { 'Authorization': usuarioAuth.token }
+            })
+            if (!peticion.ok) {
+                setError('No se pudo cambiar la visibilidad')
+                return
+            }
+            await resultados()
+        } catch (e) {
+            console.log(e)
+            setError('Error de conexión con el servidor')
+        }
+    }
+
+    const esMio = (contacto) =>
+        contacto.propietario && contacto.propietario.toString() === usuarioAuth.id?.toString()
 
     return (
         <>
@@ -127,21 +190,24 @@ export const ResultadoContacto = () => {
                                 <span className="badge bg-secondary">{contactosState.length} contactos</span>
                                 <button
                                     className="btn btn-primary btn-sm"
-                                    onClick={() => setMostrarFormulario(true)}
+                                    onClick={() => { setModoFormulario('agregar'); setFormulario(formularioVacio); setErrorFormulario(null) }}
+                                    disabled={modoFormulario !== null}
                                 >
                                     + Agregar contacto
                                 </button>
                             </div>
                         </div>
 
-                        {mostrarFormulario && (
+                        {modoFormulario !== null && (
                             <div className="card mb-4">
                                 <div className="card-body">
-                                    <h6 className="card-title">Nuevo contacto</h6>
+                                    <h6 className="card-title">
+                                        {modoFormulario === 'editar' ? 'Editar contacto' : 'Nuevo contacto'}
+                                    </h6>
                                     {errorFormulario && (
                                         <div className="alert alert-danger py-2">{errorFormulario}</div>
                                     )}
-                                    <form onSubmit={handleAgregar}>
+                                    <form onSubmit={handleSubmitFormulario}>
                                         <div className="row g-3">
                                             <div className="col-md-4">
                                                 <label className="form-label">Nombre *</label>
@@ -241,16 +307,58 @@ export const ResultadoContacto = () => {
                                             <th>Email</th>
                                             <th>Empresa</th>
                                             <th>Teléfonos</th>
+                                            <th>Visibilidad</th>
+                                            <th>Acciones</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {contactosState.map((contacto) => (
-                                            <tr key={contacto._id}>
+                                            <tr
+                                                key={contacto._id}
+                                                className={editandoId === contacto._id ? 'table-warning' : ''}
+                                            >
                                                 <td>{contacto.nombre}</td>
                                                 <td>{contacto.apellido}</td>
                                                 <td>{contacto.email}</td>
                                                 <td>{contacto.empresa || '-'}</td>
                                                 <td>{contacto.telefonos?.join(', ') || '-'}</td>
+                                                <td>
+                                                    {esMio(contacto) ? (
+                                                        <span className={`badge ${contacto.esPublico ? 'bg-success' : 'bg-secondary'}`}>
+                                                            {contacto.esPublico ? 'Público' : 'Privado'}
+                                                        </span>
+                                                    ) : (
+                                                        <span className="badge bg-info text-dark">Público</span>
+                                                    )}
+                                                </td>
+                                                <td>
+                                                    {esMio(contacto) && (
+                                                        <div className="d-flex gap-1 flex-wrap">
+                                                            <button
+                                                                className="btn btn-outline-primary btn-sm"
+                                                                onClick={() => handleAbrirEditar(contacto)}
+                                                                disabled={modoFormulario !== null}
+                                                                title="Editar"
+                                                            >
+                                                                Editar
+                                                            </button>
+                                                            <button
+                                                                className={`btn btn-sm ${contacto.esPublico ? 'btn-outline-secondary' : 'btn-outline-success'}`}
+                                                                onClick={() => handleTogglePublico(contacto._id)}
+                                                                title={contacto.esPublico ? 'Hacer privado' : 'Hacer público'}
+                                                            >
+                                                                {contacto.esPublico ? 'Privatizar' : 'Publicar'}
+                                                            </button>
+                                                            <button
+                                                                className="btn btn-outline-danger btn-sm"
+                                                                onClick={() => handleEliminar(contacto._id)}
+                                                                title="Eliminar"
+                                                            >
+                                                                Eliminar
+                                                            </button>
+                                                        </div>
+                                                    )}
+                                                </td>
                                             </tr>
                                         ))}
                                     </tbody>
