@@ -8,7 +8,8 @@ export class ContactoController {
     }
 
     getAll = async (req, res) => {
-        res.json(await this.modelo.getAll(req.usuario.id));
+        const isAdmin = req.usuario.rol === 'admin';
+        res.json(await this.modelo.getAll(req.usuario.id, isAdmin));
     }
 
     getById = async (req, res) => {
@@ -60,6 +61,18 @@ export class ContactoController {
         if (!contacto.propietario || contacto.propietario.toString() !== req.usuario.id)
             return res.status(403).json('Sin permiso');
         const actualizado = await this.modelo.togglePublico(id);
+        res.json(actualizado);
+    }
+
+    toggleVisible = async (req, res) => {
+        if (req.usuario.rol !== 'admin')
+            return res.status(403).json('Solo el administrador puede cambiar la visibilidad');
+        const id = req.params.id;
+        const contacto = await this.modelo.getOneById(id);
+        if (!contacto) return res.status(404).end();
+        if (!contacto.esPublico)
+            return res.status(400).json('Solo se puede cambiar la visibilidad de contactos públicos');
+        const actualizado = await this.modelo.toggleVisible(id);
         res.json(actualizado);
     }
 }

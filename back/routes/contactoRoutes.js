@@ -19,5 +19,7 @@ contactoRoutes.put("/:id", controlador.update);
 
 contactoRoutes.patch("/:id/publico", controlador.togglePublico);
 
+contactoRoutes.patch("/:id/visible", controlador.toggleVisible);
+
 return contactoRoutes;
 }

@@ -69,6 +69,7 @@ export class UsuarioModel{
             id: usuarioEncontrado._id,
             nick:usuarioEncontrado.nick,
             mail:usuarioEncontrado.mail,
+            rol:usuarioEncontrado.rol,
             token:token
         }
         return usuarioFormateado;

@@ -10,6 +10,7 @@ export const crearToken=(usuario)=>{
         id:usuario.id,
         nick:usuario.nick,
         mail:usuario.mail,
+        rol:usuario.rol,
         exp:Date.now()+caducidad
     }
     return jwt.encode(payload, process.env.SECRETO)

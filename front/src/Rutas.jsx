@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Login } from "./Login.jsx";
 import { Registro } from "./Registro.jsx";
 import { Contactos } from "./Contactos.jsx";
+import { FormularioContacto } from "./FormularioContacto.jsx";
 import { ProveedorContexto } from "./ProveedorContexto.jsx";
 import { Navbar } from "./Navbar.jsx";
 
@@ -17,6 +18,8 @@ export const Rutas = () => {
           <Route path="/login" element={<Login />} />
           <Route path="/registro" element={<Registro />} />
           <Route path="/contactos" element={<Contactos />} />
+          <Route path="/contactos/nuevo" element={<FormularioContacto />} />
+          <Route path="/contactos/editar/:id" element={<FormularioContacto />} />
           <Route path="*" element={<h1>404 Not Found</h1>} />
         </Routes>
       </ProveedorContexto>

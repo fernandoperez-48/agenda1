@@ -25,8 +25,11 @@ const ContactoSchema = new Schema(
 const Contacto=model("Contacto", ContactoSchema);
 
 export class ContactoModel {
-    static async getAll(userId){
+    static async getAll(userId, isAdmin){
         try {
+            if (isAdmin) {
+                return await Contacto.find({});
+            }
             return await Contacto.find({
                 $or: [
                     { propietario: userId },
@@ -66,6 +69,20 @@ export class ContactoModel {
         try {
             await contactoGuardar.save();
                 return contactoGuardar;
+        } catch (e){
+            console.log(e);
+        }
+    }
+
+    static async toggleVisible(id){
+        try {
+            const contacto = await Contacto.findById(id);
+            if (!contacto) return null;
+            return await Contacto.findByIdAndUpdate(
+                id,
+                { esVisible: !contacto.esVisible },
+                { new: true }
+            );
         } catch (e){
             console.log(e);
         }
