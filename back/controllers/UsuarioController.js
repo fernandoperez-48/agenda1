@@ -20,6 +20,19 @@ export class UsuarioController{
         res.json(nuevoUsuario)
     }
 
+    update = async (req, res) => {
+        const { id } = req.params;
+        const datos = req.body;
+
+        const usuarioActualizado = await this.modelo.update(id, datos);
+
+        if (!usuarioActualizado) {
+            return res.status(404).json("Usuario no encontrado");
+        }
+
+        res.json(usuarioActualizado);
+    }
+
     login=async(req,res)=>{
         const datosAuth=req.body
 

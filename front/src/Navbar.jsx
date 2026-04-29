@@ -17,7 +17,7 @@ export const Navbar = () => {
             <div className="container-fluid px-3">
                 {usuarioAuth ? (
                     <div className="d-flex align-items-center gap-2">
-                        <span className="text-white fw-semibold">{usuarioAuth.nick}</span>
+                        <NavLink to="/usuario/editar" className="text-white fw-semibold text-decoration-none">{usuarioAuth.nick}</NavLink>
                         <button className="btn btn-outline-light btn-sm" onClick={cerrarSesion}>
                             Salir
                         </button>
